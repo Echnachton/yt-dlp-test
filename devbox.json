@@ -4,7 +4,8 @@
     "python@3.14.0rc1",
     "pip-audit@2.9.0",
     "yt-dlp@2025.07.21",
-    "go@1.25rc2"
+    "go@1.25rc2",
+    "code-cursor@1.4.2"
   ],
   "shell": {
     "init_hook": [
