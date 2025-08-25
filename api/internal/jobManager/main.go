@@ -4,11 +4,14 @@ import (
 	"os/exec"
 	"sync"
 
+	"github.com/Echnachton/yt-dlp-test/internal/db"
 	"github.com/Echnachton/yt-dlp-test/internal/logger"
 )
 
 type Job struct {
+	ID string `json:"id"`
 	URL string `json:"url" binding:"required"`
+	OwnerID string `json:"owner_id" binding:"required"`
 }
 
 type JobManager struct {
@@ -34,7 +37,13 @@ func (jobManager *JobManager) worker() {
 }
 
 func (jobManager *JobManager) processJob(job *Job) {
-	cmd := exec.Command("yt-dlp", job.URL, "-P", "temp:/tmp", "-P", "home:../../videos")
+	db.GetDB().Exec("INSERT INTO videos (url, internal_video_id, owner_id) VALUES (?, ?, ?)", job.URL, job.ID, job.OwnerID)
+	outDir :="home:../../videos/" + job.ID + ".%(ext)s"
+	cmd := exec.Command(
+		"yt-dlp", job.URL, 
+	"-P", "temp:/tmp", 
+	"-P", outDir)
+
 	if err := cmd.Run(); err != nil {
 		logger.Printf("Error downloading %s: %v\n", job.URL, err)
 	} else {

@@ -10,6 +10,7 @@ import (
 	"github.com/Echnachton/yt-dlp-test/internal/jobManager"
 	"github.com/Echnachton/yt-dlp-test/internal/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 const WORKER_COUNT = 5
@@ -18,6 +19,10 @@ var youtubeUrlRegex = regexp.MustCompile(`^https:\/\/www\.youtube\.com.*`)
 
 func init() {
 	logger.Init()
+}
+
+type DownloadRequest struct {
+	URL string `json:"url" binding:"required"`
 }
 
 func main() {
@@ -30,7 +35,7 @@ func main() {
 	});
 
 	router.POST("/download", func(c *gin.Context) {
-		var request jobManager.Job
+		var request DownloadRequest
 		if err := c.ShouldBindJSON(&request); err != nil {
 			return
 		}
@@ -40,7 +45,11 @@ func main() {
 			return
 		}
 
-		jbmgr.AddJob(&request)
+		var job jobManager.Job
+		job.URL = request.URL
+		job.ID = uuid.New().String()
+		job.OwnerID = c.GetHeader("test_user")
+		jbmgr.AddJob(&job)
 
 		c.JSON(200, gin.H{"message": "Job queued successfully"})
 	})

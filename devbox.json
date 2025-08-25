@@ -5,7 +5,8 @@
     "pip-audit@2.9.0",
     "yt-dlp@2025.07.21",
     "go@1.25rc2",
-    "code-cursor@1.4.2"
+    "code-cursor@1.4.2",
+    "sqlite@3.50.2"
   ],
   "shell": {
     "init_hook": [
