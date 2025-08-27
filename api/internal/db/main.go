@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/Echnachton/yt-dlp-test/internal/logger"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
@@ -17,13 +18,13 @@ func Init() {
 	once.Do(func() {
 		logger.Println("Initializing database...")
 
-		globalDb, err = sql.Open("sqlite3", "../../yt-dlp.db")
+		globalDb, err = sql.Open("sqlite3", "../db/yt-dlp.db")
 		if err != nil {
 			logger.Println("Error opening database:", err)
 			return
 		}
 
-	globalDb.Exec("CREATE TABLE IF NOT EXISTS videos (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, internal_video_id TEXT, owner_id TEXT, )")
+	globalDb.Exec("CREATE TABLE IF NOT EXISTS videos (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, internal_video_id TEXT, owner_id TEXT)")
 	})
 }
 

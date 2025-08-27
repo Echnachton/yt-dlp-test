@@ -53,8 +53,9 @@ func (jobManager *JobManager) processJob(job *Job) {
 
 func NewJobManager(workerCount int) *JobManager {
 	return &JobManager{
-		jobQueue:    make(chan *Job),
+		jobQueue:    make(chan *Job, 100),
 		waitGroup:   sync.WaitGroup{},
+		workerCount: workerCount,
 	}
 }
 
