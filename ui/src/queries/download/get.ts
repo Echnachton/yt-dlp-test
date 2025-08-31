@@ -1,7 +1,7 @@
 export type Download = {
   id: number;
   url: string;
-  ownerId: string;
+  owner_id: string;
 };
 
 export type DownloadResponse = {

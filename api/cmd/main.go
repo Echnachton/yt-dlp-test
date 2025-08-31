@@ -31,16 +31,6 @@ type DownloadRequest struct {
 func main() {
 	router := gin.Default()
 	
-	router.Use(func(c *gin.Context) {
-		if c.Request.Method == "OPTIONS" {
-			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, test_user")
-			c.AbortWithStatus(204)
-			return
-		}
-		c.Next()
-	})
-	
 	apiV1Routes := router.Group("/api/v1")
 	
 	jbmgr := jobManager.NewJobManager(WORKER_COUNT)
@@ -83,7 +73,7 @@ func main() {
 	})
 	
 	apiV1Routes.GET("/download", func(c *gin.Context) {
-		queryResult, err := db.GetDB().Query("SELECT * FROM videos")
+		queryResult, err := db.GetDB().Query("SELECT id, url, owner_id FROM videos")
 		if err != nil {
 			c.JSON(500, gin.H{"message": "Internal server error"})
 			return
@@ -93,7 +83,10 @@ func main() {
 		var videos []jobManager.Job
 		for queryResult.Next() {
 			var video jobManager.Job
-			queryResult.Scan(&video.ID, &video.URL, &video.OwnerID)
+			if err := queryResult.Scan(&video.ID, &video.URL, &video.OwnerID); err != nil {
+				logger.Printf("Error scanning row: %v", err)
+				continue
+			}
 			videos = append(videos, video)
 		}
 		c.JSON(200, gin.H{"videos": videos})
