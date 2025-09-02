@@ -8,10 +8,20 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetFileHandler(c *gin.Context) {
+type FileRequest struct {
+	ID string `json:"id" binding:"required"`
+}
+
+func PostFileHandler(c *gin.Context) {
+	var request FileRequest
 	var path string
-	id := c.Param("id")
-	queryResults, err := db.GetDB().Query("SELECT internal_video_id FROM videos WHERE internal_video_id = ?", id)
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(400, gin.H{"message": "Invalid JSON", "error": err.Error()})
+		return
+	}
+	
+	queryResults, err := db.GetDB().Query("SELECT internal_video_id FROM videos WHERE internal_video_id = ?", request.ID)
 	defer queryResults.Close()
 
 	if err != nil {
@@ -37,5 +47,5 @@ func GetFileHandler(c *gin.Context) {
 
 	fileName := fileInfo[0].Name()
 
-	c.File("../../videos/" + path + fileName)
+	c.File("../../videos/" + path + "/" + fileName)
 }

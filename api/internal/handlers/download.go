@@ -24,7 +24,7 @@ type DownloadResponse struct {
 	Status string `json:"status"`
 }
 
-func DownloadHandler(jbmgr *jobManager.JobManager) gin.HandlerFunc {
+func PostDownloadHandler(jbmgr *jobManager.JobManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request DownloadRequest
 		if err := c.ShouldBindJSON(&request); err != nil {

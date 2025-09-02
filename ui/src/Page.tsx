@@ -16,11 +16,10 @@ import { postDownload } from "@/queries/download/post";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bug } from "lucide-react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { getFile } from "./queries/file/get";
+import { postFile } from "./queries/file/post";
 
 const headers = ["ID", "URL", "Owner ID", "Status"];
 
@@ -44,7 +43,6 @@ type FormData = z.infer<typeof formSchema>;
 
 export const Page = () => {
   const queryClient = useQueryClient();
-  const [id, setId] = useState<string>();
 
   const {
     register,
@@ -60,12 +58,14 @@ export const Page = () => {
     queryFn: getDownloads,
   });
 
-  useQuery<
-    Blob
-  >({
-    enabled: !!id,
-    queryKey: ["file", id],
-    queryFn: () => getFile(id!),
+  const {
+    mutate: mutateFile,
+    isPending: isPendingFile,
+  } = useMutation({
+    onError: (error) => {
+      toast.error(error.message);
+    },
+    mutationFn: postFile,
   });
 
   const { mutate, isPending, error: mutationError } = useMutation({
@@ -157,16 +157,22 @@ export const Page = () => {
               {data?.videos?.map((download, index) => (
                 <TableRow key={download.id}>
                   <TableCell>{index + 1}</TableCell>
+
                   <TableCell>
                     <Button
                       onClick={() =>
-                        setId(download.id)}
-                      disabled={download.status !== "COMPLETED"}
+                        mutateFile({ id: download.id })}
+                      disabled={download.status !== "COMPLETED" ||
+                        isPendingFile}
                     >
+                      {isPendingFile && <Spinnner />}
+
                       {download.url}
                     </Button>
                   </TableCell>
+
                   <TableCell>{download.owner_id}</TableCell>
+
                   <TableCell>{download.status}</TableCell>
                 </TableRow>
               ))}

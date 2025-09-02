@@ -9,10 +9,11 @@ func SetupRoutes(router *gin.Engine, jbmgr *jobManager.JobManager) {
 	apiV1Routes := router.Group("/api/v1")
 	
 	apiV1Routes.GET("/health", HealthHandler)
+	apiV1Routes.GET("/health/:id", DynamicHealthFileHandler)
 
-	apiV1Routes.GET("/file/:id", GetFileHandler)
+	apiV1Routes.POST("/file", PostFileHandler)
 	
-	apiV1Routes.POST("/download", DownloadHandler(jbmgr))
+	apiV1Routes.POST("/download", PostDownloadHandler(jbmgr))
 	apiV1Routes.GET("/download", GetDownloadsHandler)
 	
 	router.StaticFS("/web", gin.Dir("../web/static", true))
