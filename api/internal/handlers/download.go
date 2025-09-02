@@ -17,6 +17,13 @@ type DownloadRequest struct {
 	URL string `json:"url" binding:"required"`
 }
 
+type DownloadResponse struct {
+	ID string `json:"id"`
+	URL string `json:"url"`
+	OwnerID string `json:"owner_id"`
+	Status string `json:"status"`
+}
+
 func DownloadHandler(jbmgr *jobManager.JobManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request DownloadRequest
@@ -51,16 +58,16 @@ func DownloadHandler(jbmgr *jobManager.JobManager) gin.HandlerFunc {
 }
 
 func GetDownloadsHandler(c *gin.Context) {
-	queryResult, err := db.GetDB().Query("SELECT id, url, owner_id, status FROM videos")
+	queryResult, err := db.GetDB().Query("SELECT internal_video_id, url, owner_id, status FROM videos")
 	if err != nil {
 		c.JSON(500, gin.H{"message": "Internal server error"})
 		return
 	}
 	defer queryResult.Close()
 	
-	var videos []jobManager.Job
+	var videos []DownloadResponse
 	for queryResult.Next() {
-		var video jobManager.Job
+		var video DownloadResponse
 		if err := queryResult.Scan(&video.ID, &video.URL, &video.OwnerID, &video.Status); err != nil {
 			logger.Printf("Error scanning row: %v", err)
 			continue

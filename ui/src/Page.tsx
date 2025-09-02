@@ -16,11 +16,13 @@ import { postDownload } from "@/queries/download/post";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bug } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { getFile } from "./queries/file/get";
 
-const headers = ["ID", "URL", "Owner ID"];
+const headers = ["ID", "URL", "Owner ID", "Status"];
 
 const formSchema = z.object({
   url: z
@@ -42,6 +44,8 @@ type FormData = z.infer<typeof formSchema>;
 
 export const Page = () => {
   const queryClient = useQueryClient();
+  const [id, setId] = useState<string>();
+
   const {
     register,
     handleSubmit,
@@ -54,6 +58,14 @@ export const Page = () => {
   const { data, isLoading, error: queryError } = useQuery<DownloadResponse>({
     queryKey: ["downloads"],
     queryFn: getDownloads,
+  });
+
+  useQuery<
+    Blob
+  >({
+    enabled: !!id,
+    queryKey: ["file", id],
+    queryFn: () => getFile(id!),
   });
 
   const { mutate, isPending, error: mutationError } = useMutation({
@@ -142,11 +154,20 @@ export const Page = () => {
                 </TableRow>
               )}
 
-              {data?.videos?.map((download) => (
+              {data?.videos?.map((download, index) => (
                 <TableRow key={download.id}>
-                  <TableCell>{download.id}</TableCell>
-                  <TableCell>{download.url}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() =>
+                        setId(download.id)}
+                      disabled={download.status !== "SUCCESS"}
+                    >
+                      {download.url}
+                    </Button>
+                  </TableCell>
                   <TableCell>{download.owner_id}</TableCell>
+                  <TableCell>{download.status}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

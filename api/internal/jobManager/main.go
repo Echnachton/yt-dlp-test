@@ -12,7 +12,6 @@ type Job struct {
 	ID string `json:"id"`
 	URL string `json:"url" binding:"required"`
 	OwnerID string `json:"owner_id" binding:"required"`
-	Status string `json:"status" binding:"required"`
 }
 
 type JobManager struct {
@@ -50,7 +49,7 @@ func (jobManager *JobManager) processJob(job *Job) {
 		db.GetDB().Exec("UPDATE videos SET status = 'FAILED' WHERE internal_video_id = ?", job.ID)
 	} else {
 		logger.Printf("Successfully downloaded %s\n", job.URL)
-		db.GetDB().Exec("UPDATE videos SET status = 'SUCCESS' WHERE internal_video_id = ?", job.ID)
+		db.GetDB().Exec("UPDATE videos SET status = 'COMPLETED' WHERE internal_video_id = ?", job.ID)
 	}
 }
 
