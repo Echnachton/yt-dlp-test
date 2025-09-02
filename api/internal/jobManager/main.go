@@ -1,6 +1,7 @@
 package jobManager
 
 import (
+	"bytes"
 	"os/exec"
 	"sync"
 
@@ -44,11 +45,24 @@ func (jobManager *JobManager) processJob(job *Job) {
 	"-P", "temp:/tmp", 
 	"-P", outDir)
 
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
 	if err := cmd.Run(); err != nil {
-		logger.Printf("Error downloading %s: %v\n", job.URL, err)
+		logger.Printf("Error downloading %s: %s\n", job.URL, err)
+		
+		if stdout.Len() > 0 {
+			logger.Printf("Stdout: %s\n", stdout.String())
+		}
+
+		if stderr.Len() > 0 {
+			logger.Printf("  Stderr: %s\n", stderr.String())
+		}
+		
 		db.GetDB().Exec("UPDATE videos SET status = 'FAILED' WHERE internal_video_id = ?", job.ID)
 	} else {
-		logger.Printf("Successfully downloaded %s\n", job.URL)
+		logger.Printf("Successfully downloaded %s (Job ID: %s)\n", job.URL, job.ID)
 		db.GetDB().Exec("UPDATE videos SET status = 'COMPLETED' WHERE internal_video_id = ?", job.ID)
 	}
 }

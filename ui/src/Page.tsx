@@ -161,7 +161,7 @@ export const Page = () => {
                     <Button
                       onClick={() =>
                         setId(download.id)}
-                      disabled={download.status !== "SUCCESS"}
+                      disabled={download.status !== "COMPLETED"}
                     >
                       {download.url}
                     </Button>
