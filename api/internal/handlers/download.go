@@ -51,7 +51,7 @@ func DownloadHandler(jbmgr *jobManager.JobManager) gin.HandlerFunc {
 }
 
 func GetDownloadsHandler(c *gin.Context) {
-	queryResult, err := db.GetDB().Query("SELECT id, url, owner_id FROM videos")
+	queryResult, err := db.GetDB().Query("SELECT id, url, owner_id, status FROM videos")
 	if err != nil {
 		c.JSON(500, gin.H{"message": "Internal server error"})
 		return
@@ -61,7 +61,7 @@ func GetDownloadsHandler(c *gin.Context) {
 	var videos []jobManager.Job
 	for queryResult.Next() {
 		var video jobManager.Job
-		if err := queryResult.Scan(&video.ID, &video.URL, &video.OwnerID); err != nil {
+		if err := queryResult.Scan(&video.ID, &video.URL, &video.OwnerID, &video.Status); err != nil {
 			logger.Printf("Error scanning row: %v", err)
 			continue
 		}

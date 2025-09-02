@@ -24,7 +24,7 @@ func Init() {
 			return
 		}
 
-	globalDb.Exec("CREATE TABLE IF NOT EXISTS videos (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, internal_video_id TEXT, owner_id TEXT)")
+	globalDb.Exec("CREATE TABLE IF NOT EXISTS videos (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, internal_video_id TEXT, owner_id TEXT, status TEXT)")
 	})
 }
 
